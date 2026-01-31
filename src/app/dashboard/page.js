@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/supabaseClient";
+import {client} from "@/lib/supabase/supabaseClient";
+
+const supabase = client;
 
 export default function Home() {
   const [title, setTitle] = useState("");
@@ -25,20 +27,45 @@ export default function Home() {
   async function addTask() {
     if (!title || !deadline) return;
 
-    await supabase.from("tasks").insert({
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+    setError("You must be logged in to add tasks");
+    return;
+    }
+
+    const {error} = await supabase.from("tasks").insert({
       title,
       priority,
       deadline,
+      user_id: user.id
     });
+
+    if (error){
+      console.error(error);
+    }else{
 
     setTitle("");
     setDeadline("");
     fetchTasks();
+    }
   }
 
   async function completeTask(id) {
-    await supabase.from("tasks").update({ completed: true }).eq("id", id);
+    const { error } = await supabase.from("tasks").update({ completed: true }).eq("id", id);
+    if (error) {
+      console.error("Error completing task:", error);
+    }
     fetchTasks();
+  }
+
+  async function deleteTask(id) {
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) {
+      console.error("Error deleting task:", error);
+    } else {
+      fetchTasks();
+    }
   }
 
   const upcoming = tasks.filter((t) => !t.completed);
@@ -84,6 +111,7 @@ export default function Home() {
               className="px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
+              required
             />
 
             <button
@@ -154,12 +182,21 @@ export default function Home() {
             {completed.map((task) => (
               <div
                 key={task.id}
-                className="bg-green-50 rounded-xl border border-green-200 p-4 shadow-inner text-gray-500"
+                className="group flex justify-between items-center bg-green-50 rounded-xl border border-green-200 p-4 shadow-inner text-gray-500"
               >
-                <p className="line-through font-medium">{task.title}</p>
-                <p className="text-xs mt-1">
-                  {task.priority} • {task.deadline}
-                </p>
+                <div>
+                  <p className="line-through font-medium">{task.title}</p>
+                  <p className="text-xs mt-1">
+                    {task.priority} • {task.deadline}
+                  </p>
+                </div>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-1.5 rounded-lg text-sm font-medium transition"
+                  aria-label="Delete task"
+                >
+                  Delete
+                </button>
               </div>
             ))}
           </div>
