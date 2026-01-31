@@ -1,234 +1,103 @@
 "use client";
 
 import { useState } from "react";
-import {client} from "@/lib/supabase/supabaseClient";
-import { useRouter } from 'next/navigation'
-
+import { client } from "@/lib/supabase/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter()
+  const [message, setMessage] = useState("");
+  const router = useRouter();
 
-  //Step 1 - create the supabase client
   const supabase = client;
 
   async function handleSignIn() {
-    console.log("Signing in");
-    //Step 1 - create the supabase client - Done
-    //Step 2 - sign in the user
-    //Step 3 - redirect to the dashboard
-    //Step 4 - show a success message
-    try {
-      setError("");
-
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-      if (signInError) {
-        setError(`❌ ${signInError.message}`);
-        return;
-      }
-
-      setError("✅ Sign in successful! Redirecting...");
-      router.push("/dashboard");
-    } catch (err) {
-      setError(`❌ ${err.message}`);
-    }
+    setMessage("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) return setMessage(`❌ ${error.message}`);
+    setMessage("✅ Login successful");
+    router.push("/dashboard");
   }
 
   async function handleSignUp() {
-    console.log("Signing up");
-    //Step 1 - create the supabase client - Done
-    //Step 2 - sign up the user
-
-    try {
-      setError("");
-
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (signUpError) {
-        setError(`❌ ${signUpError.message}`);
-        return;
-      } else {
-        setError("✅ Email sentsuccessful! Redirecting...");
-        router.push("/login");
-      }
-    } catch (error) {
-      setError(`❌ An error occurred: ${error.message}`);
-    }
-
-    //Step 3 - redirect to the dashboard
-    //Step 4 - show a success message
-    //Step 5 - show an error message if the user already exists
+    setMessage("");
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) return setMessage(`❌ ${error.message}`);
+    setMessage("✅ Check your email to verify your account");
   }
 
   return (
-    <>
-      <style>{`
-        input::placeholder {
-          color: #999;
-          opacity: 1;
-        }
-        input::-webkit-input-placeholder {
-          color: #999;
-        }
-        input::-moz-placeholder {
-          color: #999;
-          opacity: 1;
-        }
-        input:-ms-input-placeholder {
-          color: #999;
-        }
-      `}</style>
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "40px",
-            maxWidth: "400px",
-            width: "100%",
-            boxShadow: "0 10px 40px rgba(0, 0, 0, 0.1)",
-          }}
+    <div className="min-h-screen flex items-center justify-center 
+                    bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600 px-4">
+      
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8
+                      transition-all duration-300 hover:-translate-y-1">
+        
+        {/* Header */}
+        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-2">
+          Welcome
+        </h1>
+        <p className="text-center text-gray-500 mb-8 text-sm">
+          Login to continue
+        </p>
+
+        <input
+          type="email"
+          placeholder="Email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-4 px-4 py-3 rounded-xl border border-gray-300
+                     focus:ring-2 focus:ring-rose-500 focus:border-rose-500
+                     outline-none transition text-black"
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full mb-6 px-4 py-3 rounded-xl border border-gray-300
+                     focus:ring-2 focus:ring-rose-500 focus:border-rose-500
+                     outline-none transition text-black"
+        />
+
+        <button
+          onClick={handleSignIn}
+          className="w-full py-3 rounded-xl bg-rose-600
+                     hover:bg-rose-700 text-white font-semibold
+                     shadow-lg hover:shadow-xl transition-all"
         >
-          <h1
-            style={{
-              fontSize: "2rem",
-              fontWeight: "bold",
-              marginBottom: "10px",
-              color: "#333",
-              textAlign: "center",
-            }}
-          >
-            Welcome Back
-          </h1>
-          <p
-            style={{
-              color: "#666",
-              textAlign: "center",
-              marginBottom: "30px",
-              fontSize: "0.95rem",
-            }}
-          >
-            Sign in to your account or create a new one
-          </p>
+          Sign In
+        </button>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              display: "block",
-              width: "100%",
-              margin: "15px 0",
-              padding: "12px 16px",
-              border: "2px solid #e0e0e0",
-              borderRadius: "8px",
-              fontSize: "1rem",
-              boxSizing: "border-box",
-              color: "#000",
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              display: "block",
-              width: "100%",
-              margin: "15px 0",
-              padding: "12px 16px",
-              border: "2px solid #e0e0e0",
-              borderRadius: "8px",
-              fontSize: "1rem",
-              boxSizing: "border-box",
-              color: "#000",
-            }}
-          />
+        <button
+          onClick={handleSignUp}
+          className="w-full py-3 mt-3 rounded-xl
+                     border border-rose-600 text-rose-600
+                     hover:bg-rose-50 font-semibold transition"
+        >
+          Create Account
+        </button>
 
+        {message && (
           <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              marginTop: "25px",
-            }}
+            className={`mt-6 p-3 rounded-xl text-center text-sm font-medium ${
+              message.startsWith("✅")
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+            }`}
           >
-            <button
-              onClick={handleSignIn}
-              style={{
-                flex: 1,
-                padding: "12px 24px",
-                background: "#667eea",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "1rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "background 0.3s",
-              }}
-              onMouseOver={(e) => (e.target.style.background = "#5568d3")}
-              onMouseOut={(e) => (e.target.style.background = "#667eea")}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={handleSignUp}
-              style={{
-                flex: 1,
-                padding: "12px 24px",
-                background: "#f0f0f0",
-                color: "#333",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "1rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "background 0.3s",
-              }}
-              onMouseOver={(e) => (e.target.style.background = "#e0e0e0")}
-              onMouseOut={(e) => (e.target.style.background = "#f0f0f0")}
-            >
-              Sign Up
-            </button>
+            {message}
           </div>
-
-          {error && (
-            <div
-              style={{
-                marginTop: "20px",
-                padding: "12px",
-                background: error.startsWith("✅") ? "#d4edda" : "#f8d7da",
-                color: error.startsWith("✅") ? "#155724" : "#721c24",
-                borderRadius: "8px",
-                fontSize: "0.9rem",
-                textAlign: "center",
-              }}
-            >
-              {error}
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

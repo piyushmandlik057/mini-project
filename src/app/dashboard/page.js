@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {client} from "@/lib/supabase/supabaseClient";
+import { client } from "@/lib/supabase/supabaseClient";
 
 const supabase = client;
 
@@ -10,6 +10,7 @@ export default function Home() {
   const [priority, setPriority] = useState("Top Priority");
   const [deadline, setDeadline] = useState("");
   const [tasks, setTasks] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchTasks();
@@ -27,45 +28,38 @@ export default function Home() {
   async function addTask() {
     if (!title || !deadline) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-    setError("You must be logged in to add tasks");
-    return;
+      setError("You must be logged in to add tasks");
+      return;
     }
 
-    const {error} = await supabase.from("tasks").insert({
+    const { error } = await supabase.from("tasks").insert({
       title,
       priority,
       deadline,
-      user_id: user.id
+      user_id: user.id,
     });
 
-    if (error){
-      console.error(error);
-    }else{
-
-    setTitle("");
-    setDeadline("");
-    fetchTasks();
+    if (!error) {
+      setTitle("");
+      setDeadline("");
+      setError("");
+      fetchTasks();
     }
   }
 
   async function completeTask(id) {
-    const { error } = await supabase.from("tasks").update({ completed: true }).eq("id", id);
-    if (error) {
-      console.error("Error completing task:", error);
-    }
+    await supabase.from("tasks").update({ completed: true }).eq("id", id);
     fetchTasks();
   }
 
   async function deleteTask(id) {
-    const { error } = await supabase.from("tasks").delete().eq("id", id);
-    if (error) {
-      console.error("Error deleting task:", error);
-    } else {
-      fetchTasks();
-    }
+    await supabase.from("tasks").delete().eq("id", id);
+    fetchTasks();
   }
 
   const upcoming = tasks.filter((t) => !t.completed);
@@ -78,26 +72,32 @@ export default function Home() {
   };
 
   return (
-    <div className="flex justify-center p-6">
-      <div className="w-full max-w-4xl bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 transition-all">
-        
+    <div className="min-h-screen flex justify-center items-start px-6 py-10
+                    bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600">
+
+      {/* Main Card */}
+      <div className="w-full max-w-5xl bg-white/90 backdrop-blur-xl
+                      rounded-3xl shadow-2xl p-8">
+
         {/* Header */}
-        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-8 tracking-wide">
+        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-8">
           🗂 Task Scheduler
         </h1>
 
         {/* Input Card */}
-        <div className="bg-white rounded-xl shadow-md p-4 mb-8 border">
+        <div className="bg-white rounded-2xl shadow-md p-4 mb-8 border">
           <div className="flex flex-col md:flex-row gap-3">
             <input
-              className="flex-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              className="flex-1 px-4 py-2 rounded-lg border
+                         focus:ring-2 focus:ring-rose-500 outline-none"
               placeholder="What needs to be done?"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
 
             <select
-              className="px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none"
+              className="px-4 py-2 rounded-lg border
+                         focus:ring-2 focus:ring-rose-500 outline-none"
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
             >
@@ -108,19 +108,28 @@ export default function Home() {
 
             <input
               type="date"
-              className="px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 outline-none"
+              className="px-4 py-2 rounded-lg border
+                         focus:ring-2 focus:ring-rose-500 outline-none"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              required
             />
 
             <button
               onClick={addTask}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold shadow hover:shadow-lg transition-all active:scale-95"
+              className="bg-rose-600 hover:bg-rose-700 text-white
+                         px-6 py-2 rounded-lg font-semibold
+                         shadow-md hover:shadow-lg
+                         transition-all active:scale-95"
             >
               ➕ Add
             </button>
           </div>
+
+          {error && (
+            <p className="mt-3 text-sm text-red-600 text-center">
+              {error}
+            </p>
+          )}
         </div>
 
         {/* Upcoming Tasks */}
@@ -137,7 +146,9 @@ export default function Home() {
             {upcoming.map((task) => (
               <div
                 key={task.id}
-                className="group flex justify-between items-center bg-white rounded-xl border p-4 shadow-sm hover:shadow-md transition"
+                className="group flex justify-between items-center
+                           bg-white rounded-xl border p-4 shadow-sm
+                           hover:shadow-md transition"
               >
                 <div>
                   <p className="font-semibold text-gray-800">
@@ -159,7 +170,9 @@ export default function Home() {
 
                 <button
                   onClick={() => completeTask(task.id)}
-                  className="opacity-0 group-hover:opacity-100 text-green-600 hover:text-green-800 text-2xl transition"
+                  className="opacity-0 group-hover:opacity-100
+                             text-green-600 hover:text-green-800
+                             text-2xl transition"
                 >
                   ✔
                 </button>
@@ -182,7 +195,9 @@ export default function Home() {
             {completed.map((task) => (
               <div
                 key={task.id}
-                className="group flex justify-between items-center bg-green-50 rounded-xl border border-green-200 p-4 shadow-inner text-gray-500"
+                className="group flex justify-between items-center
+                           bg-green-50 rounded-xl border border-green-200
+                           p-4 shadow-inner text-gray-500"
               >
                 <div>
                   <p className="line-through font-medium">{task.title}</p>
@@ -190,10 +205,13 @@ export default function Home() {
                     {task.priority} • {task.deadline}
                   </p>
                 </div>
+
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-800 hover:bg-red-100 px-3 py-1.5 rounded-lg text-sm font-medium transition"
-                  aria-label="Delete task"
+                  className="opacity-0 group-hover:opacity-100
+                             text-red-600 hover:text-red-800
+                             hover:bg-red-100 px-3 py-1.5
+                             rounded-lg text-sm font-medium transition"
                 >
                   Delete
                 </button>
