@@ -34,19 +34,49 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center 
-                    bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600 px-4">
-      
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8
-                      transition-all duration-300 hover:-translate-y-1">
-        
-        {/* Header */}
-        <h1 className="text-3xl font-extrabold text-center text-gray-800 mb-2">
-          Welcome
+    <div className="relative min-h-screen flex flex-col items-center justify-center
+                    bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-600
+                    overflow-hidden px-4">
+
+      {/* Subtle Background Shapes */}
+      <div className="absolute -top-20 -left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+
+      {/* Header */}
+      <div className="relative z-10 text-center mb-12">
+        <h1 className="text-5xl font-extrabold text-white tracking-tight
+                       flex items-center justify-center gap-3">
+          <span className="text-4xl">🗂</span>
+          <span>Task Scheduler</span>
         </h1>
-        <p className="text-center text-gray-500 mb-8 text-sm">
+
+        <p className="mt-4 text-white/90 text-base max-w-md mx-auto">
+          Organize your tasks and stay productive
+        </p>
+      </div>
+
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md
+                      bg-white/95 backdrop-blur-xl
+                      rounded-3xl shadow-2xl
+                      p-8 transition-all duration-300
+                      hover:-translate-y-1 hover:shadow-[0_25px_60px_rgba(0,0,0,0.25)]">
+
+        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-1">
+          Welcome
+        </h2>
+        <p className="text-center text-gray-500 mb-6 text-sm">
           Login to continue
         </p>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-gray-200"></div>
+          <span className="text-xs text-gray-400 tracking-widest">
+            SECURE LOGIN
+          </span>
+          <div className="flex-1 h-px bg-gray-200"></div>
+        </div>
 
         <input
           type="email"
@@ -70,9 +100,12 @@ export default function Login() {
 
         <button
           onClick={handleSignIn}
-          className="w-full py-3 rounded-xl bg-rose-600
-                     hover:bg-rose-700 text-white font-semibold
-                     shadow-lg hover:shadow-xl transition-all"
+          className="w-full py-3 rounded-xl
+                     bg-gradient-to-r from-rose-600 to-pink-600
+                     hover:from-rose-700 hover:to-pink-700
+                     text-white font-semibold
+                     shadow-md hover:shadow-lg
+                     transition-all"
         >
           Sign In
         </button>
